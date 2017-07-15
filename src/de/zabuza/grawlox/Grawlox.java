@@ -8,20 +8,82 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.zabuza.grawlox.data.ExaminationResult;
+import de.zabuza.grawlox.data.SwearWordData;
+import de.zabuza.grawlox.util.MaxFinder;
+
+/**
+ * Grawlox is a profanity filter which offers methods for detecting and
+ * replacing swearwords.<br>
+ * Create an instance by using the factory methods, for example
+ * {@link #createFromDefault()}. After creation {@link #filter(String)} can be
+ * used to censor swearwords, {@link #detect(String)} to access all found
+ * swearwords and {@link #isProfane(String)} to get whether the input contains
+ * any swearwords.
+ * 
+ * @author Zabuza {@literal <zabuza.dev@gmail.com>}
+ *
+ */
 public final class Grawlox {
+	/**
+	 * The symbol that indicates whether a line starting with it is a comment or
+	 * not.
+	 */
 	public static final String COMMENT_SYMBOL = "#";
-	public static final String DEFAULT_FILE_PATH = "swearWords.txt";
+	/**
+	 * The default path to the file containing all swearwords.
+	 */
+	public static final String DEFAULT_FILE_PATH = "swearwords.txt";
+	/**
+	 * The character to substitute swearwords with when censoring.
+	 */
 	public static final char DEFAULT_SUBSTITUTE = '*';
+	/**
+	 * Pattern that matches any non literal symbol.
+	 */
 	private static final String NON_LITERAL_PATTERN = "[^a-zA-Z]";
 
+	/**
+	 * Creates a new Grawlox instance from a swearword database at the default
+	 * file path specified by {@link #DEFAULT_FILE_PATH}.
+	 * 
+	 * @return A new Grawlox instance with the given swearword database
+	 * @throws IOException
+	 *             If an I/O-Exception occurs while trying to process the
+	 *             swearword database at the default file path
+	 */
 	public static Grawlox createFromDefault() throws IOException {
 		return createFromSwearWordsPath(new File(DEFAULT_FILE_PATH).toPath());
 	}
 
+	/**
+	 * Creates a new Grawlox instance from a swearword database at the given
+	 * file.
+	 * 
+	 * @param swearWordsFile
+	 *            The file containing the swearword database listing one
+	 *            swearword per line
+	 * @return A new Grawlox instance with the given swearword database
+	 * @throws IOException
+	 *             If an I/O-Exception occurs while trying to process the
+	 *             swearword database at the given file
+	 */
 	public static Grawlox createFromSwearWordsPath(final File swearWordsFile) throws IOException {
 		return createFromSwearWordsPath(swearWordsFile.toPath());
 	}
 
+	/**
+	 * Creates a new Grawlox instance from a swearword database at the given
+	 * path.
+	 * 
+	 * @param swearWordsPath
+	 *            The path containing the swearword database listing one
+	 *            swearword per line
+	 * @return A new Grawlox instance with the given swearword database
+	 * @throws IOException
+	 *             If an I/O-Exception occurs while trying to process the
+	 *             swearword database at the given path
+	 */
 	public static Grawlox createFromSwearWordsPath(final Path swearWordsPath) throws IOException {
 		final HashSet<String> swearWords = new HashSet<>();
 		final MaxFinder maxFinder = new MaxFinder(0);
@@ -39,28 +101,30 @@ public final class Grawlox {
 		return new Grawlox(swearWords, maxFinder.getMaxValue());
 	}
 
+	/**
+	 * Creates a new Grawlox instance from a swearword database at the given
+	 * path.
+	 * 
+	 * @param swearWordsPath
+	 *            The path containing the swearword database listing one
+	 *            swearword per line
+	 * @return A new Grawlox instance with the given swearword database
+	 * @throws IOException
+	 *             If an I/O-Exception occurs while trying to process the
+	 *             swearword database at the given path
+	 */
 	public static Grawlox createFromSwearWorldPath(final String swearWordsPath) throws IOException {
 		return createFromSwearWordsPath(new File(swearWordsPath).toPath());
 	}
 
 	/**
-	 * Demonstrates the usage of Grawlox.
+	 * Prepares the given input for usage by lowering it, replacing some
+	 * characters and removing leetspeak.
 	 * 
-	 * @param args
-	 *            Not supported
-	 * @throws IOException
-	 *             If an I/O-Exception occurs
+	 * @param input
+	 *            The input to prepare
+	 * @return The prepared input
 	 */
-	public static void main(final String[] args) throws IOException {
-		final String input = "Hello you f0o‰÷bar you are fo---ooo b4r...";
-		final Grawlox grawlox = createFromDefault();
-
-		System.out.println("Input is:\t" + input);
-		System.out.println("Is profane:\t" + grawlox.isProfane(input));
-		System.out.println("Detected:\t" + grawlox.detect(input));
-		System.out.println("Filtered:\t" + grawlox.filter(input));
-	}
-
 	public static String prepareInput(final String input) {
 		final char[] inputChars = input.toLowerCase().toCharArray();
 
@@ -93,15 +157,36 @@ public final class Grawlox {
 		return result;
 	}
 
+	/**
+	 * The length of the largest swearword of this instance.
+	 */
 	private final int mLargestSwearWordLength;
 
+	/**
+	 * The set of swearwords of this instance.
+	 */
 	private final Set<String> mSwearWords;
 
+	/**
+	 * Creates a new instance with given swearwords.
+	 * 
+	 * @param swearWords
+	 *            The set of swearwords for this instance
+	 * @param largestSwearWordLength
+	 *            The length of the largest swearword in the set
+	 */
 	public Grawlox(final Set<String> swearWords, final int largestSwearWordLength) {
 		this.mSwearWords = swearWords;
 		this.mLargestSwearWordLength = largestSwearWordLength;
 	}
 
+	/**
+	 * Detects and returns all swearwords found in the given input.
+	 * 
+	 * @param input
+	 *            The input to detect swearwords from
+	 * @return A list of all detected swearwords
+	 */
 	public ArrayList<String> detect(final String input) {
 		final ArrayList<SwearWordData> data = examine(input).getSwearWordData();
 
@@ -113,12 +198,30 @@ public final class Grawlox {
 		return swearWords;
 	}
 
-	public ExaminationResults examine(final String input) {
+	/**
+	 * Examines the given input for swearwords and returns detailed results.<br>
+	 * Same as calling {@link #examine(String, boolean) #examine(input, false)}.
+	 * 
+	 * @param input
+	 *            The input to examine for swearwords
+	 * @return Detailed results about detected swearwords
+	 */
+	public ExaminationResult examine(final String input) {
 		return examine(input, false);
 	}
 
-	public ExaminationResults examine(final String input, final boolean stopAtDetection) {
-		final ExaminationResults results = new ExaminationResults(input);
+	/**
+	 * Examines the given input for swearwords and returns detailed results.
+	 * 
+	 * @param input
+	 *            The input to examine for swearwords
+	 * @param stopAtDetection
+	 *            Whether the method should stop and return once the first
+	 *            swearword has been detected
+	 * @return Detailed results about detected swearwords
+	 */
+	public ExaminationResult examine(final String input, final boolean stopAtDetection) {
+		final ExaminationResult results = new ExaminationResult(input);
 
 		// Iterate over each letter of the input
 		for (int i = 0; i < input.length(); i++) {
@@ -154,10 +257,30 @@ public final class Grawlox {
 		return results;
 	}
 
+	/**
+	 * Filters the given input by censoring all detected swearwords with the
+	 * default symbol specified by {@link #DEFAULT_SUBSTITUTE}.<br>
+	 * Same as calling {@link #filter(String, char) #filter(input,
+	 * DEFAULT_SUBSTITUTE)}.
+	 * 
+	 * @param input
+	 *            The input to filter
+	 * @return The filtered input
+	 */
 	public String filter(final String input) {
 		return filter(input, DEFAULT_SUBSTITUTE);
 	}
 
+	/**
+	 * Filters the given input by censoring all detected swearwords with the
+	 * given substitute character.
+	 * 
+	 * @param input
+	 *            The input to filter
+	 * @param substitute
+	 *            The character to substitute detected swearwords with
+	 * @return The filtered input
+	 */
 	public String filter(final String input, final char substitute) {
 		final ArrayList<SwearWordData> data = examine(input).getSwearWordData();
 
@@ -175,6 +298,14 @@ public final class Grawlox {
 		return new String(inputChars);
 	}
 
+	/**
+	 * Whether the given input is profane, i.e. if it contains swearwords.
+	 * 
+	 * @param input
+	 *            The input in question
+	 * @return <tt>True</tt> if the input contains swearwords, <tt>false</tt>
+	 *         otherwise
+	 */
 	public boolean isProfane(final String input) {
 		return examine(input, true).containsSwearWords();
 	}

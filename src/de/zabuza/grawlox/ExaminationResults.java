@@ -24,6 +24,10 @@ public final class ExaminationResults {
 	}
 
 	public boolean containsSwearWords() {
-		return this.mSwearWordData.isEmpty();
+		return !this.mSwearWordData.isEmpty();
+	}
+
+	public ArrayList<SwearWordData> getSwearWordData() {
+		return this.mSwearWordData;
 	}
 }

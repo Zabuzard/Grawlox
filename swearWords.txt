@@ -1,0 +1,7 @@
+# Grawlox
+# List of swear words (one per line)
+# Comments can be made by starting a line with #
+# Grawlox will convert all words to lower case and remove special characters and leetspeak.
+# Therefore it is unnecessary to add words like 'foo', 'Foo', 'f0o' etc. multiple times.
+foo
+bar

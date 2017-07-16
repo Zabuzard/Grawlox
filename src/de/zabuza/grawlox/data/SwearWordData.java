@@ -30,7 +30,7 @@ public final class SwearWordData implements Comparable<SwearWordData> {
 	}
 
 	/**
-	 * Orders ascending by comparing the </tt>beginIndex<tt> given with
+	 * Orders ascending by comparing the <tt>beginIndex</tt> given with
 	 * {@link #getBeginIndex()}.
 	 */
 	@Override
